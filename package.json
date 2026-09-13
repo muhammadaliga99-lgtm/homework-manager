@@ -1,0 +1,27 @@
+{
+  "name": "homework-manager-8a",
+  "version": "1.0.0",
+  "description": "8-A sinf uchun zamonaviy Haftalik Uy Ishlari Boshqaruvchisi (Homework Manager)",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "keywords": [
+    "homework",
+    "manager",
+    "8-a",
+    "school",
+    "realtime"
+  ],
+  "author": "Antigravity Senior Developer",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "qrcode": "^1.5.3",
+    "swagger-ui-express": "^5.0.0",
+    "ws": "^8.16.0"
+  }
+}

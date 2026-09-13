@@ -1,0 +1,128 @@
+[
+  {
+    "id": "kelajak-soati",
+    "name": "Kelajak soati",
+    "category": "Social & Ethics",
+    "type": "regular"
+  },
+  {
+    "id": "ingliz-tili",
+    "name": "Ingliz tili",
+    "category": "Languages",
+    "type": "regular"
+  },
+  {
+    "id": "ona-tili",
+    "name": "Ona tili",
+    "category": "Languages",
+    "type": "regular"
+  },
+  {
+    "id": "adabiyot",
+    "name": "Adabiyot",
+    "category": "Literature",
+    "type": "regular"
+  },
+  {
+    "id": "kimyo",
+    "name": "Kimyo",
+    "category": "Natural Sciences",
+    "type": "regular"
+  },
+  {
+    "id": "tarbiya",
+    "name": "Tarbiya",
+    "category": "Social & Ethics",
+    "type": "regular"
+  },
+  {
+    "id": "texnologiya",
+    "name": "Texnologiya",
+    "category": "Applied Arts",
+    "type": "regular"
+  },
+  {
+    "id": "iqtisodiyot",
+    "name": "Iqtisodiyot",
+    "category": "Social Studies",
+    "type": "regular"
+  },
+  {
+    "id": "biologiya",
+    "name": "Biologiya",
+    "category": "Natural Sciences",
+    "type": "regular"
+  },
+  {
+    "id": "geometriya",
+    "name": "Geometriya",
+    "category": "Exact Sciences",
+    "type": "regular"
+  },
+  {
+    "id": "rus-tili",
+    "name": "Rus tili",
+    "category": "Languages",
+    "type": "regular"
+  },
+  {
+    "id": "informatika",
+    "name": "Informatika",
+    "category": "Computer Science",
+    "type": "regular"
+  },
+  {
+    "id": "fizika",
+    "name": "Fizika",
+    "category": "Exact Sciences",
+    "type": "regular"
+  },
+  {
+    "id": "ozbekiston-tarixi",
+    "name": "O'zbekiston tarixi",
+    "category": "History",
+    "type": "regular"
+  },
+  {
+    "id": "geografiya",
+    "name": "Geografiya",
+    "category": "Natural Sciences",
+    "type": "regular"
+  },
+  {
+    "id": "huquq",
+    "name": "Huquq",
+    "category": "Social Studies",
+    "type": "regular"
+  },
+  {
+    "id": "algebra",
+    "name": "Algebra",
+    "category": "Exact Sciences",
+    "type": "regular"
+  },
+  {
+    "id": "umumjahon-tarixi",
+    "name": "Umumjahon tarixi",
+    "category": "History",
+    "type": "regular"
+  },
+  {
+    "id": "chizmachilik",
+    "name": "Chizmachilik",
+    "category": "Applied Arts",
+    "type": "regular"
+  },
+  {
+    "id": "it-qoshimcha",
+    "name": "IT (Qo'shimcha dars)",
+    "category": "Extra Courses",
+    "type": "extra"
+  },
+  {
+    "id": "matematika-qoshimcha",
+    "name": "Matematika (Qo'shimcha dars)",
+    "category": "Extra Courses",
+    "type": "extra"
+  }
+]

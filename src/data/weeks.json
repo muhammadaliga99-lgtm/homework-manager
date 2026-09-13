@@ -1,0 +1,318 @@
+{
+  "2026-W37": {
+    "weekKey": "2026-W37",
+    "dateRange": {
+      "start": "07.09.2026",
+      "end": "13.09.2026",
+      "rawStart": "2026-09-06",
+      "rawEnd": "2026-09-12"
+    },
+    "subjects": {
+      "kelajak-soati": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:48:50.123Z"
+      },
+      "ingliz-tili": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:50:42.027Z"
+      },
+      "ona-tili": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:48:50.124Z"
+      },
+      "adabiyot": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:48:50.124Z"
+      },
+      "kimyo": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:48:50.124Z"
+      },
+      "tarbiya": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:48:50.124Z"
+      },
+      "texnologiya": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:48:50.124Z"
+      },
+      "iqtisodiyot": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:48:50.124Z"
+      },
+      "biologiya": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:48:50.124Z"
+      },
+      "geometriya": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:48:50.124Z"
+      },
+      "rus-tili": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:48:50.124Z"
+      },
+      "informatika": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:48:50.124Z"
+      },
+      "fizika": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:48:50.124Z"
+      },
+      "ozbekiston-tarixi": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:48:50.124Z"
+      },
+      "geografiya": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:48:50.124Z"
+      },
+      "huquq": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:48:50.124Z"
+      },
+      "algebra": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:48:50.124Z"
+      },
+      "umumjahon-tarixi": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:48:50.124Z"
+      },
+      "chizmachilik": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:48:50.124Z"
+      },
+      "it-qoshimcha": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:48:50.124Z"
+      },
+      "matematika-qoshimcha": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:48:50.124Z"
+      }
+    }
+  },
+  "2026-W38": {
+    "weekKey": "2026-W38",
+    "dateRange": {
+      "start": "14.09.2026",
+      "end": "20.09.2026",
+      "rawStart": "2026-09-13",
+      "rawEnd": "2026-09-19"
+    },
+    "subjects": {
+      "kelajak-soati": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:49:39.370Z"
+      },
+      "ingliz-tili": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:49:39.370Z"
+      },
+      "ona-tili": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:49:39.370Z"
+      },
+      "adabiyot": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:49:39.370Z"
+      },
+      "kimyo": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:49:39.370Z"
+      },
+      "tarbiya": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:49:39.370Z"
+      },
+      "texnologiya": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:49:39.370Z"
+      },
+      "iqtisodiyot": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:49:39.370Z"
+      },
+      "biologiya": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:49:39.370Z"
+      },
+      "geometriya": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:49:39.370Z"
+      },
+      "rus-tili": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:49:39.370Z"
+      },
+      "informatika": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:49:39.370Z"
+      },
+      "fizika": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:49:39.370Z"
+      },
+      "ozbekiston-tarixi": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:49:39.370Z"
+      },
+      "geografiya": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:49:39.370Z"
+      },
+      "huquq": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:49:39.370Z"
+      },
+      "algebra": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:49:39.370Z"
+      },
+      "umumjahon-tarixi": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:49:39.370Z"
+      },
+      "chizmachilik": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:49:39.370Z"
+      },
+      "it-qoshimcha": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:49:39.370Z"
+      },
+      "matematika-qoshimcha": {
+        "completed": false,
+        "note": "",
+        "assignment": "",
+        "deadline": "",
+        "updatedAt": "2026-09-13T03:49:39.370Z"
+      }
+    }
+  }
+}

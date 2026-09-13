@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Homework Manager</title>
+  
+  <!-- Meta tags -->
+  <meta name="theme-color" content="#09090b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Minimalist, modern, and distraction-free homework manager.">
+
+  <!-- Inter & JetBrains Mono Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Feather Icons -->
+  <script src="https://unpkg.com/feather-icons"></script>
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Minimalist Top Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <h1 class="brand-title">Homework Manager</h1>
+        <span id="syncDot" class="sync-dot online" title="Real-time sync active"></span>
+      </div>
+
+      <div class="nav-actions">
+        <!-- Theme Toggle -->
+        <button id="themeToggleBtn" class="action-btn icon-only" title="Toggle dark/light mode" aria-label="Toggle theme">
+          <i data-feather="sun" id="themeIcon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="app-main">
+
+    <!-- Overview & Progress Minimal Card -->
+    <section class="overview-card">
+      <div class="overview-header">
+        <div>
+          <h2 class="overview-title">Weekly Homework</h2>
+          <p class="overview-subtitle" id="progressSummaryText">0 of 21 completed</p>
+        </div>
+        <div class="overview-metric">
+          <span id="progressPercent" class="metric-number">0%</span>
+        </div>
+      </div>
+
+      <!-- Minimal Progress Bar -->
+      <div class="progress-track">
+        <div id="progressBar" class="progress-fill" style="width: 0%;"></div>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="overview-actions">
+        <button id="markAllBtn" class="btn btn-secondary btn-sm">
+          <i data-feather="check-square"></i>
+          <span>Mark all as done</span>
+        </button>
+        <button id="resetBtn" class="btn btn-ghost btn-sm" title="Clear all marks for a new week">
+          <i data-feather="rotate-ccw"></i>
+          <span>Reset week</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- SUBJECTS SECTION -->
+    <section class="subjects-section">
+      <!-- Search & Filter Controls -->
+      <div class="filter-bar">
+        <div class="search-input-wrap">
+          <i data-feather="search"></i>
+          <input type="text" id="subjectSearch" placeholder="Search subjects..." autocomplete="off">
+          <button id="clearSearch" class="clear-btn" aria-label="Clear search">&times;</button>
+        </div>
+
+        <div class="filter-tags" id="subjectFilterTags">
+          <button class="tag-btn active" data-filter="all">All (21)</button>
+          <button class="tag-btn" data-filter="pending">Pending</button>
+          <button class="tag-btn" data-filter="completed">Completed</button>
+          <button class="tag-btn" data-filter="extra">IT & Math</button>
+        </div>
+      </div>
+
+      <!-- Subjects Minimal List -->
+      <div id="subjectsList" class="items-list">
+        <!-- Dynamically rendered -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: EDIT SUBJECT ASSIGNMENT -->
+  <div id="editSubjectModal" class="modal-backdrop">
+    <div class="modal-sheet">
+      <div class="modal-sheet-header">
+        <h3 id="modalSubjectTitle">Edit Assignment</h3>
+        <button class="modal-close-btn" data-close="editSubjectModal" aria-label="Close">&times;</button>
+      </div>
+      <form id="editSubjectForm" class="modal-sheet-body">
+        <input type="hidden" id="editSubjectId">
+        
+        <div class="field">
+          <label for="editAssignment">Assignment (Book, exercise, topic)</label>
+          <input type="text" id="editAssignment" placeholder="e.g. Page 45, exercises 12-15" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <label for="editDeadline">Due Date</label>
+          <input type="date" id="editDeadline">
+        </div>
+
+        <div class="field">
+          <label for="editNote">Additional Notes / Instructions</label>
+          <textarea id="editNote" rows="2" placeholder="Write neatly in notebook..."></textarea>
+        </div>
+
+        <div class="modal-sheet-footer">
+          <button type="button" class="btn btn-secondary" data-close="editSubjectModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- App Script -->
+  <script src="js/app.js"></script>
+  <script>
+    feather.replace();
+  </script>
+</body>
+</html>

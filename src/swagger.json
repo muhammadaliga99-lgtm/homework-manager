@@ -1,0 +1,383 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "8-A Sinf Homework Manager API",
+    "version": "1.0.0",
+    "description": "8-A sinf o'quvchilari uchun haftalik uy ishlarini boshqarish, cross-device real-time sinxronizatsiya va qo'shimcha topshiriqlar REST API-si.",
+    "contact": {
+      "name": "8-A Sinf Homework Manager",
+      "email": "support@8a-homework.uz"
+    }
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Joriy server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Fanlar",
+      "description": "Maktab fanlari va qo'shimcha darslar"
+    },
+    {
+      "name": "Haftalik Uy Ishlari",
+      "description": "Haftalar bo'yicha uy ishlari va ularning holati"
+    },
+    {
+      "name": "Qo'shimcha Topshiriqlar",
+      "description": "Foydalanuvchi tomonidan qo'shiladigan shaxsiy tasklar"
+    },
+    {
+      "name": "Statistika va Tarmoq",
+      "description": "Progress, statistika va cross-device telefon ulanishi"
+    }
+  ],
+  "paths": {
+    "/api/subjects": {
+      "get": {
+        "tags": ["Fanlar"],
+        "summary": "Barcha fanlar ro'yxatini olish",
+        "description": "8-A sinfning barcha darslari (Jismoniy madaniyatsiz) va IT hamda Matematika qo'shimcha darslari ro'yxatini qaytaradi.",
+        "responses": {
+          "200": {
+            "description": "Fanlar muvaffaqiyatli olindi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Subject"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/weeks/{weekKey}": {
+      "get": {
+        "tags": ["Haftalik Uy Ishlari"],
+        "summary": "Tanlangan haftadagi uy ishlari holati",
+        "parameters": [
+          {
+            "name": "weekKey",
+            "in": "path",
+            "required": true,
+            "description": "ISO Hafta formati (masalan: 2026-W37)",
+            "schema": {
+              "type": "string",
+              "example": "2026-W37"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hafta ma'lumotlari muvaffaqiyatli olindi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeekData"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/weeks/{weekKey}/toggle": {
+      "post": {
+        "tags": ["Haftalik Uy Ishlari"],
+        "summary": "Fanning uy ishi bajarilganlik holatini o'zgartirish (Toggle)",
+        "parameters": [
+          {
+            "name": "weekKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["subjectId"],
+                "properties": {
+                  "subjectId": {
+                    "type": "string",
+                    "example": "matematika-qoshimcha"
+                  },
+                  "completed": {
+                    "type": "boolean",
+                    "description": "Ixtiyoriy majburiy holat"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Holat o'zgartirildi va real-time tarqatildi"
+          }
+        }
+      }
+    },
+    "/api/weeks/{weekKey}/subjects/{subjectId}": {
+      "put": {
+        "tags": ["Haftalik Uy Ishlari"],
+        "summary": "Fanning uy ishi matni, eslatmasi va deadline-ini yangilash",
+        "parameters": [
+          {
+            "name": "weekKey",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "subjectId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "assignment": { "type": "string", "example": "45-bet 1-4 misollar" },
+                  "note": { "type": "string", "example": "Ustozga dushanbagacha topshirish" },
+                  "deadline": { "type": "string", "example": "2026-09-15" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Muvaffaqiyatli saqlandi"
+          }
+        }
+      }
+    },
+    "/api/weeks/{weekKey}/mark-all": {
+      "post": {
+        "tags": ["Haftalik Uy Ishlari"],
+        "summary": "Haftadagi hamma fanlarni birdaniga belgilash yoki tozalash",
+        "parameters": [
+          {
+            "name": "weekKey",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "completed": { "type": "boolean", "default": true }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Hamma fanlar belgilandi" }
+        }
+      }
+    },
+    "/api/custom-tasks": {
+      "get": {
+        "tags": ["Qo'shimcha Topshiriqlar"],
+        "summary": "Barcha qo'shimcha topshiriqlarni olish",
+        "responses": {
+          "200": {
+            "description": "Topshiriqlar ro'yxati",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/CustomTask" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Qo'shimcha Topshiriqlar"],
+        "summary": "Yangi qo'shimcha topshiriq qo'shish",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title"],
+                "properties": {
+                  "title": { "type": "string", "example": "Frontend loyihani yakunlash" },
+                  "category": { "type": "string", "example": "IT / Dasturlash" },
+                  "description": { "type": "string", "example": "Media querylarni moslashtirish" },
+                  "dueDate": { "type": "string", "example": "2026-09-18" },
+                  "priority": { "type": "string", "enum": ["high", "medium", "low"], "default": "medium" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Topshiriq yaratildi" }
+        }
+      }
+    },
+    "/api/custom-tasks/{id}": {
+      "put": {
+        "tags": ["Qo'shimcha Topshiriqlar"],
+        "summary": "Qo'shimcha topshiriqni yangilash yoki holatini o'zgartirish",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "category": { "type": "string" },
+                  "description": { "type": "string" },
+                  "dueDate": { "type": "string" },
+                  "priority": { "type": "string" },
+                  "completed": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Topshiriq yangilandi" },
+          "404": { "description": "Topshiriq topilmadi" }
+        }
+      },
+      "delete": {
+        "tags": ["Qo'shimcha Topshiriqlar"],
+        "summary": "Qo'shimcha topshiriqni o'chirish",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Topshiriq o'chirildi" },
+          "404": { "description": "Topshiriq topilmadi" }
+        }
+      }
+    },
+    "/api/overview": {
+      "get": {
+        "tags": ["Statistika va Tarmoq"],
+        "summary": "Umumiy tahlil va statistika",
+        "parameters": [
+          {
+            "name": "weekKey",
+            "in": "query",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statistika qaytarildi"
+          }
+        }
+      }
+    },
+    "/api/network-info": {
+      "get": {
+        "tags": ["Statistika va Tarmoq"],
+        "summary": "Serverning mahalliy LAN IP manzili va telefondan ulanish QR kodi",
+        "description": "Laptop va telefonni bitta Wi-Fi orqali sinxronlashtirish uchun QR kod va URL manzilini beradi.",
+        "responses": {
+          "200": {
+            "description": "Tarmoq ma'lumotlari"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Subject": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "category": { "type": "string" },
+          "color": { "type": "string" },
+          "icon": { "type": "string" },
+          "type": { "type": "string", "enum": ["regular", "extra"] }
+        }
+      },
+      "WeekData": {
+        "type": "object",
+        "properties": {
+          "weekKey": { "type": "string" },
+          "dateRange": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "string" },
+              "end": { "type": "string" }
+            }
+          },
+          "subjects": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "completed": { "type": "boolean" },
+                "assignment": { "type": "string" },
+                "note": { "type": "string" },
+                "deadline": { "type": "string" },
+                "updatedAt": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "CustomTask": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "category": { "type": "string" },
+          "description": { "type": "string" },
+          "dueDate": { "type": "string" },
+          "priority": { "type": "string" },
+          "completed": { "type": "boolean" },
+          "createdAt": { "type": "string" },
+          "completedAt": { "type": "string" }
+        }
+      }
+    }
+  }
+}
