@@ -1,20 +1,35 @@
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
-const DATA_DIR = path.join(__dirname, 'data');
+const defaultSubjects = require('./data/subjects.json');
+const defaultHomework = require('./data/homework.json');
+
+// Determine data directory (use /tmp on Vercel / serverless environments for persistent writable storage)
+function resolveDataDir() {
+  const localDir = path.join(__dirname, 'data');
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    const tmpDir = path.join(os.tmpdir(), 'homework-manager-data');
+    if (!fs.existsSync(tmpDir)) {
+      fs.mkdirSync(tmpDir, { recursive: true });
+    }
+    return tmpDir;
+  }
+  if (!fs.existsSync(localDir)) {
+    fs.mkdirSync(localDir, { recursive: true });
+  }
+  return localDir;
+}
+
+const DATA_DIR = resolveDataDir();
 const SUBJECTS_FILE = path.join(DATA_DIR, 'subjects.json');
 const HOMEWORK_FILE = path.join(DATA_DIR, 'homework.json');
 const CUSTOM_TASKS_FILE = path.join(DATA_DIR, 'custom_tasks.json');
 
-// Ensure data directory exists
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-}
-
 function readJSON(filePath, defaultValue) {
   try {
     if (!fs.existsSync(filePath)) {
-      fs.writeFileSync(filePath, JSON.stringify(defaultValue, null, 2), 'utf-8');
+      writeJSON(filePath, defaultValue);
       return defaultValue;
     }
     const raw = fs.readFileSync(filePath, 'utf-8');
@@ -27,19 +42,11 @@ function readJSON(filePath, defaultValue) {
 
 function writeJSON(filePath, data) {
   try {
-    const tempPath = `${filePath}.tmp.${Date.now()}`;
-    fs.writeFileSync(tempPath, JSON.stringify(data, null, 2), 'utf-8');
-    fs.renameSync(tempPath, filePath);
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
     return true;
   } catch (err) {
     console.error(`Error writing ${filePath}:`, err);
-    try {
-      fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
-      return true;
-    } catch (innerErr) {
-      console.error(`Fallback write failed for ${filePath}:`, innerErr);
-      return false;
-    }
+    return false;
   }
 }
 
@@ -49,8 +56,11 @@ class Storage {
   }
 
   init() {
+    if (!fs.existsSync(SUBJECTS_FILE)) {
+      writeJSON(SUBJECTS_FILE, defaultSubjects);
+    }
     if (!fs.existsSync(HOMEWORK_FILE)) {
-      this.initHomework();
+      writeJSON(HOMEWORK_FILE, defaultHomework);
     }
     if (!fs.existsSync(CUSTOM_TASKS_FILE)) {
       writeJSON(CUSTOM_TASKS_FILE, []);
@@ -58,7 +68,7 @@ class Storage {
   }
 
   getSubjects() {
-    return readJSON(SUBJECTS_FILE, []);
+    return readJSON(SUBJECTS_FILE, defaultSubjects);
   }
 
   initHomework() {
@@ -78,7 +88,7 @@ class Storage {
   }
 
   getHomework() {
-    const homework = readJSON(HOMEWORK_FILE, {});
+    const homework = readJSON(HOMEWORK_FILE, defaultHomework);
     const subjects = this.getSubjects();
     let updated = false;
 
@@ -101,6 +111,42 @@ class Storage {
     }
 
     return homework;
+  }
+
+  mergeHomework(incomingData) {
+    if (!incomingData || typeof incomingData !== 'object') {
+      return this.getHomework();
+    }
+    const current = this.getHomework();
+    let updated = false;
+
+    Object.keys(incomingData).forEach((id) => {
+      const inc = incomingData[id];
+      if (!inc) return;
+
+      const curr = current[id];
+      if (!curr) {
+        current[id] = inc;
+        updated = true;
+        return;
+      }
+
+      const incTime = inc.updatedAt ? new Date(inc.updatedAt).getTime() : 0;
+      const currTime = curr.updatedAt ? new Date(curr.updatedAt).getTime() : 0;
+
+      if (incTime > currTime) {
+        current[id] = { ...curr, ...inc };
+        updated = true;
+      } else if (incTime === currTime && inc.completed !== curr.completed) {
+        current[id] = { ...curr, ...inc };
+        updated = true;
+      }
+    });
+
+    if (updated) {
+      writeJSON(HOMEWORK_FILE, current);
+    }
+    return current;
   }
 
   toggleSubject(subjectId, forcedState = null) {
@@ -150,13 +196,14 @@ class Storage {
   resetHomework() {
     const subjects = this.getSubjects();
     const homework = {};
+    const now = new Date().toISOString();
     subjects.forEach((sub) => {
       homework[sub.id] = {
         completed: false,
         assignment: '',
         note: '',
         deadline: '',
-        updatedAt: new Date().toISOString()
+        updatedAt: now
       };
     });
     writeJSON(HOMEWORK_FILE, homework);
@@ -165,9 +212,10 @@ class Storage {
 
   markAllHomework(completed = true) {
     const homework = this.getHomework();
+    const now = new Date().toISOString();
     Object.keys(homework).forEach((id) => {
       homework[id].completed = Boolean(completed);
-      homework[id].updatedAt = new Date().toISOString();
+      homework[id].updatedAt = now;
     });
     writeJSON(HOMEWORK_FILE, homework);
     return homework;

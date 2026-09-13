@@ -92,6 +92,23 @@ app.get('/api/homework', (req, res) => {
   }
 });
 
+// 2b. Sync homework data (bulk merge from client, perfect for serverless & cross-device)
+app.post('/api/homework/sync', (req, res) => {
+  try {
+    const { homework } = req.body;
+    if (!homework || typeof homework !== 'object') {
+      return res.status(400).json({ success: false, error: 'homework obyekti kiritilishi shart' });
+    }
+
+    const result = Storage.mergeHomework(homework);
+    broadcast('HOMEWORK_SYNCED', { homework: result });
+
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Backward compatibility for /api/weeks/:weekKey
 app.get('/api/weeks/:weekKey', (req, res) => {
   try {
@@ -116,7 +133,7 @@ app.post(['/api/homework/toggle', '/api/weeks/:weekKey/toggle'], (req, res) => {
       return res.status(400).json({ success: false, error: 'subjectId kiritilishi shart' });
     }
 
-    const result = Storage.toggleSubject(subjectId, completed);
+    const result = Storage.toggleSubject(subjectId, completed !== undefined ? completed : null);
     broadcast('HOMEWORK_TOGGLED', result);
     // backward compat broadcast
     broadcast('SUBJECT_TOGGLED', { subjectId, status: result.status });
@@ -285,13 +302,18 @@ app.get('*', (req, res) => {
 });
 
 // Start Server
-server.listen(PORT, '0.0.0.0', () => {
-  const localIp = getLocalIpAddress();
-  console.log('\n======================================================');
-  console.log('   8-A SINF HOMEWORK MANAGER (MINIMALIST & CLEAN)');
-  console.log('======================================================');
-  console.log(`[LAPTOP / BROWSER]:  http://localhost:${PORT}`);
-  console.log(`[TELEFON (WI-FI)]:   http://${localIp}:${PORT}`);
-  console.log(`[SWAGGER API DOCS]:  http://localhost:${PORT}/api-docs`);
-  console.log('======================================================\n');
-});
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(PORT, '0.0.0.0', () => {
+    const localIp = getLocalIpAddress();
+    console.log('\n======================================================');
+    console.log('   8-A SINF HOMEWORK MANAGER (MINIMALIST & CLEAN)');
+    console.log('======================================================');
+    console.log(`[LAPTOP / BROWSER]:  http://localhost:${PORT}`);
+    console.log(`[TELEFON (WI-FI)]:   http://${localIp}:${PORT}`);
+    console.log(`[SWAGGER API DOCS]:  http://localhost:${PORT}/api-docs`);
+    console.log('======================================================\n');
+  });
+}
+
+module.exports = app;
+module.exports.server = server;

@@ -1,6 +1,6 @@
 /**
  * HOMEWORK MANAGER - MINIMALIST CLIENT APPLICATION
- * Clean, distraction-free, silent real-time sync (Subjects Only)
+ * Clean, distraction-free, robust offline & cross-device sync (Subjects Only)
  */
 
 // Fallback subjects if backend is offline
@@ -71,14 +71,77 @@ function escapeHTML(str) {
 }
 
 /* ==========================================================================
+   PERSISTENCE HELPERS (LOCALSTORAGE + SMART MERGE)
+   ========================================================================== */
+function saveHomeworkLocal(data) {
+  try {
+    localStorage.setItem('homework_data', JSON.stringify(data));
+  } catch (e) {
+    console.warn('Could not save to localStorage', e);
+  }
+}
+
+function loadHomeworkLocal() {
+  try {
+    const raw = localStorage.getItem('homework_data');
+    if (raw) return JSON.parse(raw);
+  } catch (e) {
+    console.warn('Could not load from localStorage', e);
+  }
+  return null;
+}
+
+function mergeHomeworkStates(local, server) {
+  if (!server && !local) return {};
+  if (!server) return local;
+  if (!local) return server;
+
+  const merged = { ...server };
+
+  Object.keys(local).forEach(id => {
+    const localItem = local[id];
+    const serverItem = server[id];
+
+    if (!serverItem) {
+      merged[id] = localItem;
+      return;
+    }
+
+    const localTime = localItem.updatedAt ? new Date(localItem.updatedAt).getTime() : 0;
+    const serverTime = serverItem.updatedAt ? new Date(serverItem.updatedAt).getTime() : 0;
+
+    // If local was updated more recently, preserve local state
+    if (localTime > serverTime) {
+      merged[id] = { ...serverItem, ...localItem };
+    } else if (localTime === serverTime) {
+      merged[id] = {
+        ...serverItem,
+        completed: localItem.completed !== undefined ? localItem.completed : serverItem.completed,
+        assignment: localItem.assignment || serverItem.assignment || '',
+        note: localItem.note || serverItem.note || '',
+        deadline: localItem.deadline || serverItem.deadline || ''
+      };
+    } else {
+      merged[id] = serverItem;
+    }
+  });
+
+  return merged;
+}
+
+/* ==========================================================================
    API CLIENT
    ========================================================================== */
 const API = {
   async fetchSubjects() {
     try {
       const res = await fetch('/api/subjects');
-      const data = await res.json();
-      if (data.success) return data.data;
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+          return data.data;
+        }
+      }
     } catch (e) {
       console.warn('Offline mode for subjects');
     }
@@ -86,102 +149,187 @@ const API = {
   },
 
   async fetchHomework() {
+    const local = loadHomeworkLocal();
+    let serverData = null;
+
     try {
       const res = await fetch('/api/homework');
-      const data = await res.json();
-      if (data.success) return data.data;
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.data) {
+          serverData = data.data;
+        }
+      }
     } catch (e) {
-      console.warn('Offline mode for homework');
+      console.warn('Offline mode for homework fetch');
     }
 
-    const local = localStorage.getItem('homework_data');
-    if (local) return JSON.parse(local);
+    if (!serverData && !local) {
+      const initial = {};
+      state.subjects.forEach(sub => {
+        initial[sub.id] = { completed: false, assignment: '', note: '', deadline: '', updatedAt: new Date().toISOString() };
+      });
+      saveHomeworkLocal(initial);
+      return initial;
+    }
 
-    const initial = {};
-    state.subjects.forEach(sub => {
-      initial[sub.id] = { completed: false, assignment: '', note: '', deadline: '' };
+    if (!serverData) return local;
+    if (!local) {
+      saveHomeworkLocal(serverData);
+      return serverData;
+    }
+
+    const merged = mergeHomeworkStates(local, serverData);
+    saveHomeworkLocal(merged);
+
+    // If client had newer updates than server, sync to backend in the background
+    let clientIsNewer = false;
+    Object.keys(local).forEach(id => {
+      const lTime = local[id]?.updatedAt ? new Date(local[id].updatedAt).getTime() : 0;
+      const sTime = serverData[id]?.updatedAt ? new Date(serverData[id].updatedAt).getTime() : 0;
+      if (lTime > sTime) clientIsNewer = true;
     });
-    return initial;
+
+    if (clientIsNewer) {
+      this.syncHomework(merged).catch(() => {});
+    }
+
+    return merged;
   },
 
-  async toggleSubject(subjectId, completed = null) {
+  async syncHomework(homeworkData) {
+    try {
+      const res = await fetch('/api/homework/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ homework: homeworkData })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) return data.data;
+      }
+    } catch (e) {
+      // offline sync ignored
+    }
+    return homeworkData;
+  },
+
+  async toggleSubject(subjectId, forceState = null) {
+    if (!state.homework[subjectId]) {
+      state.homework[subjectId] = { completed: false, assignment: '', note: '', deadline: '' };
+    }
+
+    const current = Boolean(state.homework[subjectId].completed);
+    const nextCompleted = forceState !== null ? Boolean(forceState) : !current;
+
+    // 1. Optimistic instant local update
+    state.homework[subjectId].completed = nextCompleted;
+    state.homework[subjectId].updatedAt = new Date().toISOString();
+    saveHomeworkLocal(state.homework);
+
+    // 2. Persist to server
     try {
       const res = await fetch('/api/homework/toggle', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subjectId, completed })
+        body: JSON.stringify({ subjectId, completed: nextCompleted })
       });
-      const data = await res.json();
-      if (data.success) return data.data;
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.data && data.data.status) {
+          state.homework[subjectId] = data.data.status;
+          saveHomeworkLocal(state.homework);
+          return data.data;
+        }
+      }
     } catch (e) {
       console.warn('Offline toggle');
     }
 
-    if (!state.homework[subjectId]) {
-      state.homework[subjectId] = { completed: false, assignment: '', note: '', deadline: '' };
-    }
-    const current = Boolean(state.homework[subjectId].completed);
-    state.homework[subjectId].completed = completed !== null ? completed : !current;
-    localStorage.setItem('homework_data', JSON.stringify(state.homework));
     return { subjectId, status: state.homework[subjectId] };
   },
 
   async updateSubjectDetails(subjectId, details) {
+    if (!state.homework[subjectId]) {
+      state.homework[subjectId] = { completed: false };
+    }
+    Object.assign(state.homework[subjectId], details);
+    state.homework[subjectId].updatedAt = new Date().toISOString();
+    saveHomeworkLocal(state.homework);
+
     try {
       const res = await fetch(`/api/homework/subjects/${subjectId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(details)
       });
-      const data = await res.json();
-      if (data.success) return data.data;
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.data) {
+          Object.assign(state.homework[subjectId], data.data);
+          saveHomeworkLocal(state.homework);
+          return data.data;
+        }
+      }
     } catch (e) {
       console.warn('Offline details update');
     }
 
-    if (!state.homework[subjectId]) {
-      state.homework[subjectId] = { completed: false };
-    }
-    Object.assign(state.homework[subjectId], details);
-    localStorage.setItem('homework_data', JSON.stringify(state.homework));
     return state.homework[subjectId];
   },
 
   async markAllHomework(completed = true) {
+    const now = new Date().toISOString();
+    Object.keys(state.homework).forEach(id => {
+      state.homework[id].completed = Boolean(completed);
+      state.homework[id].updatedAt = now;
+    });
+    saveHomeworkLocal(state.homework);
+
     try {
       const res = await fetch('/api/homework/mark-all', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ completed })
       });
-      const data = await res.json();
-      if (data.success) return data.data;
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.data) {
+          state.homework = data.data;
+          saveHomeworkLocal(state.homework);
+          return data.data;
+        }
+      }
     } catch (e) {
       console.warn('Offline mark all');
     }
 
-    Object.keys(state.homework).forEach(id => {
-      state.homework[id].completed = completed;
-    });
-    localStorage.setItem('homework_data', JSON.stringify(state.homework));
     return state.homework;
   },
 
   async resetHomework() {
+    const now = new Date().toISOString();
+    const resetData = {};
+    state.subjects.forEach(sub => {
+      resetData[sub.id] = { completed: false, assignment: '', note: '', deadline: '', updatedAt: now };
+    });
+    state.homework = resetData;
+    saveHomeworkLocal(state.homework);
+
     try {
       const res = await fetch('/api/homework/reset', { method: 'POST' });
-      const data = await res.json();
-      if (data.success) return data.data;
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.data) {
+          state.homework = data.data;
+          saveHomeworkLocal(state.homework);
+          return data.data;
+        }
+      }
     } catch (e) {
       console.warn('Offline reset');
     }
 
-    const resetData = {};
-    state.subjects.forEach(sub => {
-      resetData[sub.id] = { completed: false, assignment: '', note: '', deadline: '' };
-    });
-    state.homework = resetData;
-    localStorage.setItem('homework_data', JSON.stringify(state.homework));
     return state.homework;
   }
 };
@@ -216,8 +364,8 @@ function setupWebSocket() {
     ws.onclose = () => {
       state.wsConnected = false;
       elements.syncDot.className = 'sync-dot';
-      elements.syncDot.title = 'Reconnecting...';
-      setTimeout(setupWebSocket, 3000);
+      elements.syncDot.title = 'Local/Cloud sync';
+      setTimeout(setupWebSocket, 5000);
     };
 
     ws.onerror = () => {
@@ -234,20 +382,31 @@ function handleSocketEvent(msg) {
 
   if (event === 'HOMEWORK_TOGGLED' || event === 'SUBJECT_TOGGLED') {
     state.homework[payload.subjectId] = payload.status;
+    saveHomeworkLocal(state.homework);
     renderSubjects();
     updateOverview();
   } else if (event === 'HOMEWORK_DETAILS_UPDATED' || event === 'SUBJECT_DETAILS_UPDATED') {
     if (!state.homework[payload.subjectId]) state.homework[payload.subjectId] = {};
     Object.assign(state.homework[payload.subjectId], payload.details);
+    saveHomeworkLocal(state.homework);
     renderSubjects();
   } else if (event === 'HOMEWORK_RESET' || event === 'WEEK_RESET') {
     state.homework = payload.homework || (payload.week && payload.week.subjects) || {};
+    saveHomeworkLocal(state.homework);
     renderSubjects();
     updateOverview();
   } else if (event === 'HOMEWORK_MARKED_ALL' || event === 'WEEK_MARKED_ALL') {
     state.homework = payload.homework || (payload.week && payload.week.subjects) || {};
+    saveHomeworkLocal(state.homework);
     renderSubjects();
     updateOverview();
+  } else if (event === 'HOMEWORK_SYNCED') {
+    if (payload.homework) {
+      state.homework = payload.homework;
+      saveHomeworkLocal(state.homework);
+      renderSubjects();
+      updateOverview();
+    }
   }
 }
 
@@ -409,12 +568,9 @@ function setupEventListeners() {
     if (toggle) {
       e.stopPropagation();
       const id = toggle.dataset.id;
-      const res = await API.toggleSubject(id);
-      if (res && res.status) {
-        state.homework[id] = res.status;
-        renderSubjects();
-        updateOverview();
-      }
+      await API.toggleSubject(id);
+      renderSubjects();
+      updateOverview();
       return;
     }
 
@@ -477,11 +633,50 @@ async function init() {
   setupEventListeners();
   setupWebSocket();
 
-  state.subjects = await API.fetchSubjects();
-  state.homework = await API.fetchHomework();
+  // 1. Instant local render (Zero lag, zero flash of undone tasks on refresh!)
+  const localHomework = loadHomeworkLocal();
+  if (localHomework && Object.keys(localHomework).length > 0) {
+    state.homework = localHomework;
+    renderSubjects();
+    updateOverview();
+  }
 
-  renderSubjects();
-  updateOverview();
+  // 2. Fetch fresh subjects & homework from server, smart-merge and update
+  const fetchedSubjects = await API.fetchSubjects();
+  if (fetchedSubjects && fetchedSubjects.length > 0) {
+    state.subjects = fetchedSubjects;
+  }
+
+  const fetchedHomework = await API.fetchHomework();
+  if (fetchedHomework) {
+    state.homework = fetchedHomework;
+    renderSubjects();
+    updateOverview();
+  }
+
+  // 3. Visibility change listener (re-sync silently when user returns to tab)
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible') {
+      const refreshed = await API.fetchHomework();
+      if (refreshed) {
+        state.homework = refreshed;
+        renderSubjects();
+        updateOverview();
+      }
+    }
+  });
+
+  // 4. Polling fallback when WebSocket is not active (e.g. on Vercel)
+  setInterval(async () => {
+    if (!state.wsConnected && document.visibilityState === 'visible') {
+      const polled = await API.fetchHomework();
+      if (polled) {
+        state.homework = polled;
+        renderSubjects();
+        updateOverview();
+      }
+    }
+  }, 10000);
 }
 
 document.addEventListener('DOMContentLoaded', init);
